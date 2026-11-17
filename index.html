@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tiffin Box – Food Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&family=Noto+Sans+Bengali:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <h1 class="logo">Tiffin Box</h1>
+    <nav class="nav-actions" aria-label="Main">
+      <select id="lang" aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="bn">বাংলা</option></select>
+      <button id="adminToggle" class="btn ghost sm" aria-pressed="false"></button>
+      <button class="btn ghost sm" data-open="ordersModal">📦 <span data-i18n="myOrders"></span></button>
+      <button class="btn primary sm" data-open="cartDrawer">🛒 <span data-i18n="cart"></span> <span id="cartBadge" class="badge">0</span></button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h2 data-i18n="heroTitle"></h2>
+    <p data-i18n="heroSub"></p>
+  </section>
+
+  <main>
+    <section id="adminPanel" class="admin" hidden>
+      <h3 data-i18n="addDish"></h3>
+      <form id="adminForm" class="admin-form" novalidate>
+        <input name="name" data-i18n-ph="dishName">
+        <select name="category" id="adminCategory" aria-label="Category"></select>
+        <input name="price" type="number" min="1" step="1" data-i18n-ph="price">
+        <input name="image" type="url" data-i18n-ph="imageUrl">
+        <input name="description" data-i18n-ph="shortDesc">
+        <label class="check"><input type="checkbox" name="veg" checked> <span data-i18n="vegetarian"></span></label>
+        <button class="btn primary" type="submit" data-i18n="addToMenu"></button>
+        <p class="error" id="adminError" role="alert"></p>
+      </form>
+    </section>
+
+    <div id="cats" class="cats" role="group" aria-label="Categories"></div>
+    <div class="toolbar">
+      <label class="switch"><input type="checkbox" id="vegToggle"><span class="slider"></span><span data-i18n="pureVeg"></span></label>
+      <select id="sort" aria-label="Sort">
+        <option value="default" data-i18n="sortDefault"></option>
+        <option value="rating" data-i18n="sortRating"></option>
+        <option value="low" data-i18n="sortLow"></option>
+        <option value="high" data-i18n="sortHigh"></option>
+      </select>
+      <select id="maxPrice" aria-label="Max price">
+        <option value="0" data-i18n="anyPrice"></option>
+        <option value="150" data-i18n="under150"></option>
+        <option value="250" data-i18n="under250"></option>
+        <option value="350" data-i18n="under350"></option>
+      </select>
+      <input id="search" type="search" data-i18n-ph="searchPh" aria-label="Search">
+    </div>
+    <div id="menuGrid" class="grid"></div>
+  </main>
+
+  <button id="cartBar" class="cart-bar" data-open="cartDrawer" hidden><span id="cartBarText"></span><span><span data-i18n="viewCart"></span> →</span></button>
+  <div id="overlay" class="overlay" data-close hidden></div>
+
+  <aside id="cartDrawer" class="drawer" aria-label="Cart">
+    <div class="panel-head"><h3 data-i18n="yourCart"></h3><button class="btn ghost sm" data-close aria-label="Close">✕</button></div>
+    <ul id="cartItems" class="cart-list"></ul>
+    <div class="drawer-foot">
+      <div class="coupon"><input id="couponInput" data-i18n-ph="couponPh" autocomplete="off"><button class="btn ghost sm" data-apply data-i18n="apply"></button></div>
+      <div id="couponApplied"></div>
+      <p id="couponMsg" class="note"></p>
+      <div id="cartBill"></div>
+      <button id="checkoutBtn" class="btn primary block" data-open="checkoutModal" disabled data-i18n="proceed"></button>
+    </div>
+  </aside>
+
+  <div id="checkoutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="coTitle">
+    <div class="modal-box wide">
+      <div class="panel-head"><h3 id="coTitle" data-i18n="checkout"></h3><button class="btn ghost sm" data-close aria-label="Close">✕</button></div>
+      <form id="checkoutForm" novalidate>
+        <section class="step">
+          <h4><span class="n">1</span><span data-i18n="contact"></span></h4>
+          <div class="two">
+            <label><span data-i18n="fullName"></span><input name="name" autocomplete="name"><span class="error" data-err="name"></span></label>
+            <label><span data-i18n="mobile"></span><input name="phone" inputmode="numeric" maxlength="10" autocomplete="tel"><span class="error" data-err="phone"></span></label>
+          </div>
+        </section>
+
+        <section class="step">
+          <h4><span class="n">2</span><span data-i18n="deliverTo"></span></h4>
+          <div id="addrList" class="opts"></div>
+          <span class="error" data-err="addr"></span>
+          <div id="newAddr" class="sub" hidden>
+            <div class="two">
+              <label><span data-i18n="label"></span>
+                <select name="label"><option value="home" data-i18n="lbl_home"></option><option value="work" data-i18n="lbl_work"></option><option value="other" data-i18n="lbl_other"></option></select>
+              </label>
+              <label><span data-i18n="pincode"></span><input name="pin" inputmode="numeric" maxlength="6"><span class="error" data-err="pin"></span></label>
+            </div>
+            <label><span data-i18n="address"></span><textarea name="line" rows="2"></textarea><span class="error" data-err="line"></span></label>
+          </div>
+          <label><span data-i18n="instructions"></span><textarea name="notes" rows="2" data-i18n-ph="notesPh"></textarea></label>
+          <div class="chips">
+            <button type="button" class="chip" data-note="note1" data-i18n="note1"></button>
+            <button type="button" class="chip" data-note="note2" data-i18n="note2"></button>
+            <button type="button" class="chip" data-note="note3" data-i18n="note3"></button>
+          </div>
+          <p class="sub-title" data-i18n="speed"></p>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="speed" value="standard" checked><i>🛵</i><span><b data-i18n="standard"></b><br><small>30–40 min · ₹40</small></span></label>
+            <label class="opt"><input type="radio" name="speed" value="express"><i>⚡</i><span><b data-i18n="express"></b><br><small>15–20 min · ₹80</small></span></label>
+          </div>
+        </section>
+
+        <section class="step">
+          <h4><span class="n">3</span><span data-i18n="payment"></span></h4>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="payment" value="UPI"><i>📱</i><span data-i18n="upi"></span></label>
+            <label class="opt"><input type="radio" name="payment" value="Card"><i>💳</i><span data-i18n="card"></span></label>
+            <label class="opt"><input type="radio" name="payment" value="Net Banking"><i>🏦</i><span data-i18n="netbanking"></span></label>
+            <label class="opt"><input type="radio" name="payment" value="Wallet"><i>👛</i><span data-i18n="wallet"></span></label>
+            <label class="opt"><input type="radio" name="payment" value="COD"><i>💵</i><span data-i18n="cod"></span></label>
+          </div>
+          <span class="error" data-err="payment"></span>
+
+          <div class="sub" data-pay="UPI" hidden>
+            <div class="chips">
+              <label class="chip"><input type="radio" name="upiApp" value="GPay">GPay</label>
+              <label class="chip"><input type="radio" name="upiApp" value="PhonePe">PhonePe</label>
+              <label class="chip"><input type="radio" name="upiApp" value="Paytm">Paytm</label>
+              <label class="chip"><input type="radio" name="upiApp" value="BHIM">BHIM</label>
+            </div>
+            <span class="error" data-err="upiApp"></span>
+            <label><span data-i18n="upiId"></span><input name="upiId" placeholder="name@okicici" autocomplete="off"><span class="error" data-err="upiId"></span></label>
+          </div>
+
+          <div class="sub" data-pay="Card" hidden>
+            <label><span data-i18n="cardNumber"></span><input name="cardNumber" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" autocomplete="cc-number"><span class="error" data-err="cardNumber"></span></label>
+            <label><span data-i18n="cardName"></span><input name="cardName" autocomplete="cc-name"><span class="error" data-err="cardName"></span></label>
+            <div class="two">
+              <label><span data-i18n="expiry"></span><input name="cardExpiry" maxlength="5" placeholder="MM/YY" autocomplete="cc-exp"><span class="error" data-err="cardExpiry"></span></label>
+              <label><span data-i18n="cvv"></span><input name="cardCvv" type="password" inputmode="numeric" maxlength="3" autocomplete="cc-csc"><span class="error" data-err="cardCvv"></span></label>
+            </div>
+            <p class="note" data-i18n="secure"></p>
+          </div>
+
+          <div class="sub" data-pay="Net Banking" hidden>
+            <label><span data-i18n="selectBank"></span>
+              <select name="bank"><option value="">—</option><option>State Bank of India</option><option>HDFC Bank</option><option>ICICI Bank</option><option>Axis Bank</option><option>Kotak Mahindra Bank</option><option>Punjab National Bank</option><option>Bank of Baroda</option><option>Union Bank of India</option></select>
+              <span class="error" data-err="bank"></span>
+            </label>
+          </div>
+
+          <div class="sub" data-pay="Wallet" hidden>
+            <div class="chips">
+              <label class="chip"><input type="radio" name="wallet" value="Paytm Wallet">Paytm</label>
+              <label class="chip"><input type="radio" name="wallet" value="PhonePe Wallet">PhonePe</label>
+              <label class="chip"><input type="radio" name="wallet" value="Amazon Pay">Amazon Pay</label>
+              <label class="chip"><input type="radio" name="wallet" value="Mobikwik">Mobikwik</label>
+              <label class="chip"><input type="radio" name="wallet" value="Freecharge">Freecharge</label>
+            </div>
+            <span class="error" data-err="wallet"></span>
+          </div>
+
+          <p class="note" data-pay="COD" hidden data-i18n="codNote"></p>
+        </section>
+
+        <section class="step">
+          <h4><span class="n">4</span><span data-i18n="billSummary"></span></h4>
+          <div id="coBill"></div>
+          <button class="btn primary block" type="submit"><span data-i18n="placeOrder"></span> · <span id="checkoutTotal">₹0.00</span></button>
+        </section>
+      </form>
+    </div>
+  </div>
+
+  <div id="receiptModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="rcTitle">
+    <div class="modal-box">
+      <div class="panel-head"><h3 id="rcTitle" data-i18n="orderConfirmed"></h3><button class="btn ghost sm" data-close aria-label="Close">✕</button></div>
+      <div id="receiptBody"></div>
+      <button class="btn primary block" data-open="ordersModal" data-i18n="trackOrder"></button>
+    </div>
+  </div>
+
+  <div id="ordersModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="orTitle">
+    <div class="modal-box wide">
+      <div class="panel-head"><h3 id="orTitle" data-i18n="myOrders"></h3><button class="btn ghost sm" data-close aria-label="Close">✕</button></div>
+      <ul id="ordersList" class="orders"></ul>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
